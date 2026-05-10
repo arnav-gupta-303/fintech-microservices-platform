@@ -1,13 +1,12 @@
 package com.fintech.payment_services.controller;
 
-
-import com.fintech.payment_services.dto.*;
+import com.fintech.payment_services.dto.PaymentRequest;
+import com.fintech.payment_services.dto.PaymentResponse;
 import com.fintech.payment_services.service.PaymentService;
-import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
+
 import java.util.List;
 
 @RestController
@@ -19,14 +18,34 @@ public class PaymentController {
 
     @PostMapping("/send")
     public ResponseEntity<PaymentResponse> send(
-            Authentication auth,
-            @RequestHeader("Authorization") String token,
-            @Valid @RequestBody PaymentRequest request) {
-        return ResponseEntity.ok(paymentService.processPayment(auth.getName(), request, token));
+
+            @RequestHeader("X-Authenticated-User")
+            String email,
+
+            @RequestBody PaymentRequest request,
+
+            @RequestHeader("Authorization")
+            String token
+    ) {
+
+        return ResponseEntity.ok(
+                paymentService.processPayment(
+                        email,
+                        request,
+                        token
+                )
+        );
     }
 
     @GetMapping("/history")
-    public ResponseEntity<List<PaymentResponse>> history(Authentication auth) {
-        return ResponseEntity.ok(paymentService.getHistory(auth.getName()));
+    public ResponseEntity<List<PaymentResponse>> history(
+
+            @RequestHeader("X-Authenticated-User")
+            String email
+    ) {
+
+        return ResponseEntity.ok(
+                paymentService.getHistory(email)
+        );
     }
 }
